@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+	<script src="https://cdn.rawgit.com/nnattawat/flip/master/dist/jquery.flip.min.js"></script>
+<style>
+
+#memory_board{
+	background:#10DE23;
+	border:#999 1px solid;
+	width:800px;
+	height:540px;
+	padding:24px;
+	margin:0px auto;
+	/*display: flex;
+	flex-wrap: wrap;
+	justify-content: center;*/
+}
+
+.card{
+	/*background: #CCC;*/
+	background-image: url("img/imagenCarta.jpg");
+	border:#000 1px solid;
+	width:38px;
+	height:38px;
+	float:left;
+	margin:10px;
+	padding:20px;
+	font-size: 40px;
+	cursor:pointer;
+	text-align:center;	
+}
+
+
+
+.easy{
+	width: 71px;
+	height: 71px;
+	font-size: 64px;
+}
+
+.medium{
+	width: 38px;
+	height: 38px;
+	font-size: 40px;
+}
+
+.difficult{
+	width: 26px;
+	height: 26px;
+	font-size: 30px;
+}
+</style>
+<script>
+
+/*
+
+Este juego tiene 3 niveles, los cuales el usuario eligira previamente
+
+nivel 1: Usare un array de la A a la L. El width y el heiht seran ambos de 71 px con un font-size de 64
+		['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','J','J','K','K','L','L'];
+
+nivel 2: Usare un array de la A a la S. El width y el heiht seran ambos de 38 px con un font-size de 40
+		['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','J','J','K','K','L','L','M','M','N','N','Ñ','Ñ','O','O','P','P','Q','Q','R','R','S','S'];
+nivel 3: Usare un array del abecedario completo. El width y el heiht seran ambos de 21 px con un font-size de 35
+		['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','J','J','K','K','L','L','M','M','N','N','Ñ','Ñ','O','O','P','P','Q','Q','R','R','S','S','T','T','U','U','V','V','W','W','X','X','Y','Y','Z','Z'];
+*/
+
+
+	var name = window.location;
+	var res = name.split('='); 
+	var level = res[1];
+	console.log(level)
+	var memory_array = [];
+/*
+	if(level = "undifined	"){
+		var url = "index.html";
+		location.href=url;
+	}*/
+	
+	if(level == "easy"){
+		memory_array = ['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','J','J','K','K','L','L'];
+	}else if(level == "medium"){
+		memory_array = ['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','J','J','K','K','L','L','M','M','N','N','Ñ','Ñ','O','O','P','P','Q','Q','R','R','S','S'];
+	} else{
+		memory_array = ['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H','I','I','J','J','K','K','L','L','M','M','N','N','Ñ','Ñ','O','O','P','P','Q','Q','R','R','S','S','T','T','U','U','V','V','W','W','X','X','Y','Y','Z','Z'];
+	}
+
+var memory_values = [];
+var memory_tile_ids = [];
+var tiles_flipped = 0;
+Array.prototype.memory_tile_shuffle = function(){
+    var i = this.length, j, temp;
+    while(--i > 0){
+        j = Math.floor(Math.random() * (i+1));
+        temp = this[j];
+        this[j] = this[i];
+        this[i] = temp;
+    }
+}
+function newBoard(){
+
+	playSound("barajar");
+	tiles_flipped = 0;
+	var output = '';
+    memory_array.memory_tile_shuffle();
+	for(var i = 0; i < memory_array.length; i++){
+		output += '<div id="tile_'+i+'" class="card '+ level +'"  onclick="memoryFlipTile(this,\''+memory_array[i]+'\')"></div>';
+	}
+	document.getElementById('memory_board').innerHTML = output;
+}
+
+function memoryFlipTile(tile,val){
+	if(tile.innerHTML == "" && memory_values.length < 2){
+		tile.style.background = '#FFF';
+		tile.innerHTML = val;
+		
+		if(memory_values.length == 0){
+			memory_values.push(val);
+			memory_tile_ids.push(tile.id);
+		
+		} else if(memory_values.length == 1){
+			memory_values.push(val);
+			memory_tile_ids.push(tile.id);
+			if(memory_values[0] == memory_values[1]){
+				playSound("acierto");
+				tiles_flipped += 2;
+				// Clear both arrays
+				memory_values = [];
+            	memory_tile_ids = [];
+				// Check to see if the whole board is cleared
+				
+				if(tiles_flipped == memory_array.length){
+					playSound("victoria");
+					reStart();
+					
+				}
+			} else {
+				function flip2Back(){
+					//playSound("error");
+				    // Flip the 2 tiles back over
+				    var tile_1 = document.getElementById(memory_tile_ids[0]);
+				    var tile_2 = document.getElementById(memory_tile_ids[1]);
+				    tile_1.style.backgroundImage = "url(img/imagenCarta.jpg)";
+            	    tile_1.innerHTML = "";
+				    tile_2.style.backgroundImage = "url(img/imagenCarta.jpg)";
+            	    tile_2.innerHTML = "";
+				    // Clear both arrays
+				    memory_values = [];
+            	    memory_tile_ids = [];
+				}
+				setTimeout(flip2Back, 700);
+			}
+		}
+	}
+}
+
+function playSound(path){
+	path = "sound/" + path + ".mp3";
+	var sound = new Audio(path);
+	sound.play();
+}
+function reStart(){
+	setTimeout(function(){
+		alert("Congrats, you have finished the game... generating a new board");
+		document.getElementById('memory_board').innerHTML = "";
+	newBoard();
+	},1000);
+	
+}
+
+</script>
+</head>
+<body>
+<div id="memory_board">
+</div>
+
+
+<script>newBoard();</script>
+</body>
+</html>

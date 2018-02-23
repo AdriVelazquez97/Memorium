@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Juego de Memoria</title>
+</head>
+
+	<style>
+		#body{
+			background-image: url("stage2.jpg");
+			background-size: cover
+		}
+		#box{
+			
+			margin-left: 150px;
+			margin-right: 850px;
+			margin-top: 100px;
+			align-content: center
+
+		}
+
+	</style>
+	
+	<script>
+		
+		function getLevel(){
+
+			var answer = "";
+			var option = document.getElementsByName("level").length;
+                    for(i=0;i<option;i++){
+                        var check = document.getElementsByName("level"); 
+                            if(check[i].checked){
+                            answer=check[i].value;
+                        }
+                    }
+                    if(answer != ""){
+                    	var url = "juegoMemoria.html?level="+ answer;
+						location.href=url;
+                    } 
+			
+		}
+	</script>
+
+<body id="body">
+	<div id="box">
+
+	<h1>Wellcome to Memorium</h1>
+	<h2>Choose the level</h2>
+
+	<h3>
+		<input type="radio" name="level" value="easy"> Easy<br>
+  	<input type="radio" name="level" value="medium"> Medium<br>
+  	<input type="radio" name="level" value="difficult"> Difficult <br><br>
+
+	</h3>
+	
+  	<input type="submit" onclick="getLevel()"  value="PLAY">
+</div>
+
+</body>
+</html>
